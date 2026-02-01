@@ -28,7 +28,8 @@ def login():
     user = User.query.filter_by(username=data.get('username')).first()
     
     if user and user.check_password(data.get('password')):
-        access_token = create_access_token(identity=user.id)
+        # Ensure identity is a string to avoid "subject must be string" errors
+        access_token = create_access_token(identity=str(user.id))
         return jsonify(access_token=access_token, user={"id": user.id, "username": user.username}), 200
         
     return jsonify({"msg": "Bad username or password"}), 401
@@ -36,6 +37,6 @@ def login():
 @bp.route('/me', methods=['GET'])
 @jwt_required()
 def me():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
     return jsonify(id=user.id, username=user.username, email=user.email)

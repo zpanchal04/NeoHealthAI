@@ -17,23 +17,45 @@ const Dashboard = () => {
             datasetService.list(),
             api.get('/datasets/summary')
         ]).then(([recRes, predRes, dataRes, globalRes]) => {
-            setRecords(recRes.data.reverse());
+            // Backend returns data in ASC order now
+            setRecords(recRes.data);
             setPredictions(predRes.data);
             setDatasets(dataRes.data);
             setGlobalSummary(globalRes.data);
         }).finally(() => setLoading(false));
     }, []);
 
-    const latestPrediction = predictions[0] || null;
+    const isExampleData = records.length > 0 && records[0].is_example;
+    const latestPrediction = predictions[0] || (isExampleData ? { phase: 'Luteal (Sample)', confidence: 0.92 } : null);
 
     if (loading) return <div style={{ padding: '2rem' }}>Loading Insights...</div>;
 
     return (
         <div style={{ padding: '0 2rem 4rem' }}>
+            {isExampleData && (
+                <div style={{
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: 'var(--warning)',
+                    padding: '1rem',
+                    borderRadius: 'var(--radius)',
+                    marginBottom: '2rem',
+                    border: '1px solid var(--warning)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                }}>
+                    <Zap size={24} />
+                    <div>
+                        <strong>Example Data Mode:</strong> This is not accurate data and this is not your data. This is example study data shown because you haven't added any personal health records yet.
+                    </div>
+                </div>
+            )}
             <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div>
-                    <h1 className="title-gradient" style={{ fontSize: '2.5rem' }}>Health Intelligence</h1>
-                    <p style={{ color: 'var(--text-secondary)' }}>AI-powered insights based on your physiological data</p>
+                    <h1 className="title-gradient" style={{ fontSize: '2.5rem' }}>{isExampleData ? 'Example Health Intelligence' : 'Your Health Intelligence'}</h1>
+                    <p style={{ color: 'var(--text-secondary)' }}>
+                        {isExampleData ? 'Visualizing global study patterns' : 'AI-powered insights based on your physiological data'}
+                    </p>
                 </div>
                 <div className="card glass" style={{ padding: '1rem 2rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>

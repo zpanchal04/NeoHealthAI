@@ -44,6 +44,7 @@ class HealthRecord(db.Model):
     avg_resting_heart_rate = db.Column(db.Float)
     stress_score = db.Column(db.Float)
     daily_steps = db.Column(db.Float)
+    last_period_date = db.Column(db.Date) # Added this field
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

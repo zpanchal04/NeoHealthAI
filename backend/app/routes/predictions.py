@@ -9,7 +9,7 @@ bp = Blueprint('predictions', __name__)
 @bp.route('/predict', methods=['POST'])
 @jwt_required()
 def predict():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     data = request.get_json()
     
     date_str = data.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
@@ -50,7 +50,11 @@ def predict():
     historical_data = [record_to_dict(prev1), record_to_dict(prev2)]
     
     # Run ML Prediction
-    result = MLService.predict(current_data, historical_data)
+    try:
+        result = MLService.predict(current_data, historical_data)
+    except Exception as e:
+        print(f"DEBUG: ML Prediction Error: {str(e)}")
+        return jsonify({"msg": "AI Prediction failed", "error": str(e)}), 500
     
     # Store Prediction
     prediction = Prediction.query.filter_by(user_id=user_id, date=target_date).first()
@@ -74,7 +78,7 @@ def predict():
 @bp.route('/history', methods=['GET'])
 @jwt_required()
 def get_prediction_history():
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     history = Prediction.query.filter_by(user_id=user_id).order_by(Prediction.date.desc()).all()
     
     return jsonify([{
