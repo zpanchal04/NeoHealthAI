@@ -28,7 +28,6 @@ wheels/
 
 # Data
 data/raw/steps.csv
-data/processed/
 
 # Frontend
 frontend/node_modules/
